@@ -16,7 +16,7 @@
  */
 class Twig_Environment
 {
-    const VERSION = '1.23.2-DEV';
+    const VERSION = '1.24.0-DEV';
 
     protected $charset;
     protected $loader;
@@ -49,6 +49,7 @@ class Twig_Environment
     private $bcWriteCacheFile = false;
     private $bcGetCacheFilename = false;
     private $lastModifiedExtension = 0;
+    private $runtimeLoaders = array();
 
     /**
      * Constructor.
@@ -758,6 +759,14 @@ class Twig_Environment
     }
 
     /**
+     * Registers a runtime loader.
+     */
+    public function registerRuntimeLoader(Twig_RuntimeLoaderInterface $loader)
+    {
+        $this->runtimeLoaders[] = $loader;
+    }
+
+    /**
      * Gets an extension by name.
      *
      * @param string $name The extension name
@@ -771,6 +780,27 @@ class Twig_Environment
         }
 
         return $this->extensions[$name];
+    }
+
+    /**
+     * Loads and returns the runtime implementation of an extension.
+     *
+     * If no runtime implementation is explicitly registered, it fallbacks
+     * to load the extension which should contain the runtime.
+     *
+     * @param string $name The extension name
+     *
+     * @return object The runtime implementation
+     */
+    public function getRuntime($name)
+    {
+        foreach ($this->runtimeLoaders as $loader) {
+            if (null !== $runtime = $loader->load($name)) {
+                return $runtime;
+            }
+        }
+
+        return $this->getExtension($name);
     }
 
     /**

@@ -384,6 +384,26 @@ class Twig_Tests_EnvironmentTest extends PHPUnit_Framework_TestCase
         restore_error_handler();
     }
 
+    public function testRegisterRuntimeLoader()
+    {
+        $runtimeLoader = $this->getMock('Twig_RuntimeLoaderInterface');
+        $runtimeLoader->expects($this->any())->method('load')->will($this->returnValue(new Twig_Tests_EnvironmentTest_Runtime()));
+
+        $loader = new Twig_Loader_Array(array(
+            'func' => '{{ from_runtime("foo") }}',
+            'func_default' => '{{ from_runtime() }}',
+            'func_named_args' => '{{ from_runtime(name="foo") }}',
+        ));
+
+        $twig = new Twig_Environment($loader);
+        $twig->addExtension(new Twig_Tests_EnvironmentTest_ExtensionWithoutRuntime());
+        $twig->registerRuntimeLoader($runtimeLoader);
+
+        $this->assertEquals('foo', $twig->render('func'));
+        $this->assertEquals('bar', $twig->render('func_default'));
+        $this->assertEquals('foo', $twig->render('func_named_args'));
+    }
+
     protected function getMockLoader($templateName, $templateContent)
     {
         $loader = $this->getMock('Twig_LoaderInterface');
@@ -524,5 +544,28 @@ class Twig_Tests_EnvironmentTest_ExtensionWithoutDeprecationInitRuntime extends 
     public function getName()
     {
         return 'without_deprecation';
+    }
+}
+
+class Twig_Tests_EnvironmentTest_ExtensionWithoutRuntime extends Twig_Extension
+{
+    public function getFunctions()
+    {
+        return array(
+            new Twig_SimpleFunction('from_runtime', array($this, 'fromRuntime'), array('runtime_class' => 'Twig_Tests_EnvironmentTest_Runtime')),
+        );
+    }
+
+    public function getName()
+    {
+        return 'from_runtime';
+    }
+}
+
+class Twig_Tests_EnvironmentTest_Runtime
+{
+    public function fromRuntime($name = 'bar')
+    {
+        return $name;
     }
 }

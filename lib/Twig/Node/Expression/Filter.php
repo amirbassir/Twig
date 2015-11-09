@@ -32,6 +32,7 @@ class Twig_Node_Expression_Filter extends Twig_Node_Expression_Call
         }
         if ($filter instanceof Twig_SimpleFilter) {
             $this->setAttribute('is_variadic', $filter->isVariadic());
+            $this->setAttribute('runtime_class', $filter->getRuntimeClass());
         }
 
         $this->compileCallable($compiler);

@@ -31,6 +31,7 @@ class Twig_Node_Expression_Function extends Twig_Node_Expression_Call
         }
         if ($function instanceof Twig_SimpleFunction) {
             $this->setAttribute('is_variadic', $function->isVariadic());
+            $this->setAttribute('runtime_class', $function->getRuntimeClass());
         }
 
         $this->compileCallable($compiler);

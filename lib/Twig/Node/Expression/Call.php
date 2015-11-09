@@ -17,7 +17,7 @@ abstract class Twig_Node_Expression_Call extends Twig_Node_Expression
             if (is_string($callable)) {
                 $compiler->raw($callable);
             } elseif (is_array($callable) && $callable[0] instanceof Twig_ExtensionInterface) {
-                $compiler->raw(sprintf('$this->env->getExtension(\'%s\')->%s', $callable[0]->getName(), $callable[1]));
+                $compiler->raw(sprintf('$this->env->getRuntime(\'%s\')->%s', $callable[0]->getName(), $callable[1]));
             } else {
                 $type = ucfirst($this->getAttribute('type'));
                 $compiler->raw(sprintf('call_user_func_array($this->env->get%s(\'%s\')->getCallable(), array', $type, $this->getAttribute('name')));
@@ -121,7 +121,6 @@ abstract class Twig_Node_Expression_Call extends Twig_Node_Expression
             throw new LogicException($message);
         }
 
-        // manage named arguments
         $callableParameters = $this->getCallableParameters($callable, $isVariadic);
         $arguments = array();
         $names = array();
@@ -208,6 +207,10 @@ abstract class Twig_Node_Expression_Call extends Twig_Node_Expression
 
     private function getCallableParameters($callable, $isVariadic)
     {
+        if ($this->hasAttribute('runtime_class') && $this->getAttribute('runtime_class')) {
+            $callable[0] = $this->getAttribute('runtime_class');
+        }
+
         if (is_array($callable)) {
             $r = new ReflectionMethod($callable[0], $callable[1]);
         } elseif (is_object($callable) && !$callable instanceof Closure) {

@@ -34,7 +34,12 @@ class Twig_SimpleFunction
             'node_class' => 'Twig_Node_Expression_Function',
             'deprecated' => false,
             'alternative' => null,
+            'runtime_class' => null,
         ), $options);
+
+        if ($this->options['runtime_class'] && !is_array($callable)) {
+            throw new LogicException(sprintf('Function "%s" cannot define a "runtime_class" option as the callable is not a method call.', $name));
+        }
     }
 
     public function getName()
@@ -98,5 +103,10 @@ class Twig_SimpleFunction
     public function getAlternative()
     {
         return $this->options['alternative'];
+    }
+
+    public function getRuntimeClass()
+    {
+        return $this->options['runtime_class'];
     }
 }

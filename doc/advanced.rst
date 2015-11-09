@@ -651,7 +651,15 @@ main ``Environment`` object::
 
 .. tip::
 
-    The bundled extensions are great examples of how extensions work.
+    The Twig core extensions are great examples of how extensions work.
+
+.. note::
+
+    All Twig core extensions use functions for their runtime implementation for
+    efficiency. But if your runtime implementation depends on external objects,
+    you might want to decouple the extension from the runtime implementation.
+    The ``RuntimeLoaderInterface`` allows you to register an object able to
+    load the runtime implementation for extensions based on their names.
 
 Globals
 ~~~~~~~
